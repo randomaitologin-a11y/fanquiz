@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-pink-50 text-gray-800;
+}
+
+.card {
+  @apply rounded-3xl bg-white p-8 shadow-lg hover:scale-105 transition text-center cursor-pointer;
+}
+
+.btn {
+  @apply rounded-xl bg-pink-500 px-5 py-2 text-white font-medium hover:bg-pink-600 transition;
+}
