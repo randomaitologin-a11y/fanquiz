@@ -40,7 +40,8 @@ export default function ManhwaQuizPage() {
         manhwaCharacters.find(c => c.id === chosenId) ??
         manhwaCharacters[Math.floor(Math.random() * manhwaCharacters.length)]
 
-      router.push(`/result?type=manhwa&id=${result.id}`)
+      router.push(`/quiz/result?type=manhwa&id=${result.id}`)
+
       return
     }
 

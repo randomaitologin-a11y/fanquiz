@@ -37,7 +37,8 @@ export default function BLQuizPage() {
         blCharacters.find(c => c.id === chosenId) ??
         blCharacters[Math.floor(Math.random() * blCharacters.length)]
 
-      router.push(`/result?type=bl&id=${result.id}`)
+      router.push(`/quiz/result?type=bl&id=${result.id}`)
+
       return
     }
 
