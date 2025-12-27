@@ -6,46 +6,44 @@ import { blQuestions } from "@/data/blQuestions"
 import { blCharacters } from "@/data/blCharacters"
 
 export default function BLQuizPage() {
+  const router = useRouter()
   const [index, setIndex] = useState(0)
   const [scores, setScores] = useState<Record<string, number>>({})
-  const router = useRouter()
 
-  function answer(optionScores: Record<string, number>) {
-    setScores(prev => {
-      const updated = { ...prev }
+  const question = blQuestions[index]
 
-      for (const key in optionScores) {
-        updated[key] = (updated[key] || 0) + optionScores[key]
-      }
+  function handleAnswer(optionScores: Record<string, number>) {
+    const updatedScores = { ...scores }
 
-      // LAST QUESTION → CALCULATE RESULT HERE
-      if (index + 1 === blQuestions.length) {
-        const sorted = Object.entries(updated).sort((a, b) => b[1] - a[1])
-        const highestScore = sorted[0][1]
-
-        const topCandidates = sorted
-          .filter(([, score]) => highestScore - score <= 1)
-          .map(([id]) => id)
-
-        const chosenId =
-          topCandidates[Math.floor(Math.random() * topCandidates.length)]
-
-        const result =
-          blCharacters.find(c => c.id === chosenId) ||
-          blCharacters[Math.floor(Math.random() * blCharacters.length)]
-
-        router.push(`/quiz/result?type=bl&id=${result.id}`)
-      }
-
-      return updated
-    })
-
-    if (index + 1 < blQuestions.length) {
-      setIndex(prev => prev + 1)
+    for (const key in optionScores) {
+      updatedScores[key] = (updatedScores[key] || 0) + optionScores[key]
     }
-  }
 
-  const q = blQuestions[index]
+    setScores(updatedScores)
+
+    // ✅ LAST QUESTION → GO TO RESULT
+    if (index + 1 === blQuestions.length) {
+      const sorted = Object.entries(updatedScores).sort((a, b) => b[1] - a[1])
+      const topScore = sorted[0][1]
+
+      const topCandidates = sorted
+        .filter(([, score]) => topScore - score <= 1)
+        .map(([id]) => id)
+
+      const chosenId =
+        topCandidates[Math.floor(Math.random() * topCandidates.length)]
+
+      const result =
+        blCharacters.find(c => c.id === chosenId) ??
+        blCharacters[Math.floor(Math.random() * blCharacters.length)]
+
+      router.push(`/result?type=bl&id=${result.id}`)
+      return
+    }
+
+    // ✅ NEXT QUESTION
+    setIndex(prev => prev + 1)
+  }
 
   return (
     <main className="min-h-screen flex items-center justify-center px-6">
@@ -54,13 +52,13 @@ export default function BLQuizPage() {
           Question {index + 1} / {blQuestions.length}
         </h2>
 
-        <p className="text-xl text-center">{q.question}</p>
+        <p className="text-xl text-center">{question.question}</p>
 
         <div className="space-y-3">
-          {q.options.map((opt, i) => (
+          {question.options.map((opt, i) => (
             <button
               key={i}
-              onClick={() => answer(opt.scores)}
+              onClick={() => handleAnswer(opt.scores)}
               className="w-full rounded-xl bg-white p-4 shadow hover:bg-pink-100 transition"
             >
               {opt.text}

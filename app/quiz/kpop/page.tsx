@@ -6,10 +6,10 @@ import { kpopQuestions } from "@/data/kpopQuestions"
 
 export default function KpopQuizPage() {
   const router = useRouter()
-  const [current, setCurrent] = useState(0)
+  const [index, setIndex] = useState(0)
   const [scores, setScores] = useState<Record<string, number>>({})
 
-  const question = kpopQuestions[current]
+  const question = kpopQuestions[index]
 
   function handleAnswer(scoreMap: Partial<Record<string, number>>) {
     const updatedScores = { ...scores }
@@ -23,21 +23,38 @@ export default function KpopQuizPage() {
 
     setScores(updatedScores)
 
-    if (current + 1 < kpopQuestions.length) {
-      setCurrent(current + 1)
-    } else {
-      const winner = Object.entries(updatedScores)
-        .sort((a, b) => b[1] - a[1])[0]
+    // ✅ LAST QUESTION → CALCULATE RESULT
+    if (index + 1 === kpopQuestions.length) {
+      const sorted = Object.entries(updatedScores).sort((a, b) => b[1] - a[1])
 
-      router.push(`/result?type=kpop&id=${winner[0]}`)
+      // safety fallback
+      if (sorted.length === 0) {
+        router.push("/result?type=kpop&id=random")
+        return
+      }
+
+      const topScore = sorted[0][1]
+
+      const topCandidates = sorted
+        .filter(([, score]) => topScore - score <= 1)
+        .map(([id]) => id)
+
+      const winner =
+        topCandidates[Math.floor(Math.random() * topCandidates.length)]
+
+      router.push(`/result?type=kpop&id=${winner}`)
+      return
     }
+
+    // ✅ NEXT QUESTION
+    setIndex(prev => prev + 1)
   }
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-pink-50 px-6">
       <div className="max-w-xl w-full bg-white rounded-3xl p-8 shadow-lg">
         <p className="text-sm text-gray-400 mb-2">
-          Question {current + 1} / {kpopQuestions.length}
+          Question {index + 1} / {kpopQuestions.length}
         </p>
 
         <h1 className="text-xl font-semibold mb-6">
