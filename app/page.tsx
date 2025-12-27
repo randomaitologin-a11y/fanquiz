@@ -12,20 +12,23 @@ export default function Home() {
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
+        {/* BL */}
         <Link href="/quiz/bl" className="card">
           <h2 className="text-2xl font-semibold mb-2">BL Boyfriend</h2>
           <p>Find your BL soulmate 💗</p>
         </Link>
 
+        {/* Manhwa */}
         <Link href="/quiz/manhwa" className="card">
           <h2 className="text-2xl font-semibold mb-2">Manhwa Boyfriend</h2>
           <p>Dark, soft, or dangerous 🖤</p>
         </Link>
 
-        <div className="card opacity-50">
-          <h2 className="text-2xl font-semibold mb-2">More Soon</h2>
-          <p>New quizzes coming ✨</p>
-        </div>
+        {/* K-POP */}
+        <Link href="/quiz/kpop" className="card">
+          <h2 className="text-2xl font-semibold mb-2">K-Pop Boyfriend</h2>
+          <p>Your idol boyfriend awaits 🎤💖</p>
+        </Link>
       </div>
     </main>
   )

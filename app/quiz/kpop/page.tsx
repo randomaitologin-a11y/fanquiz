@@ -23,17 +23,11 @@ export default function KpopQuizPage() {
 
     setScores(updatedScores)
 
-    // ✅ LAST QUESTION → CALCULATE RESULT
+    // ✅ LAST QUESTION → RESULT
     if (index + 1 === kpopQuestions.length) {
       const sorted = Object.entries(updatedScores).sort((a, b) => b[1] - a[1])
 
-      // safety fallback
-      if (sorted.length === 0) {
-        router.push("/result?type=kpop&id=random")
-        return
-      }
-
-      const topScore = sorted[0][1]
+      const topScore = sorted[0]?.[1] ?? 0
 
       const topCandidates = sorted
         .filter(([, score]) => topScore - score <= 1)
@@ -42,11 +36,11 @@ export default function KpopQuizPage() {
       const winner =
         topCandidates[Math.floor(Math.random() * topCandidates.length)]
 
-      router.push(`/result?type=kpop&id=${winner}`)
+      // ✅ FIXED ROUTE
+      router.push(`/quiz/result?type=kpop&id=${winner}`)
       return
     }
 
-    // ✅ NEXT QUESTION
     setIndex(prev => prev + 1)
   }
 

@@ -1,67 +1,102 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { kpopQuestions } from "@/data/kpopQuestions"
+import Image from "next/image"
+import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 
-export default function KpopQuizPage() {
-  const router = useRouter()
-  const [index, setIndex] = useState(0)
-  const [scores, setScores] = useState<Record<string, number>>({})
+import { blCharacters } from "@/data/blCharacters"
+import { manhwaCharacters } from "@/data/manhwaCharacters"
+import { kpopCharacters } from "@/data/kpopCharacters"
 
-  const question = kpopQuestions[index]
+export default function ResultPage() {
+  const searchParams = useSearchParams()
+  const type = searchParams.get("type")
+  const id = searchParams.get("id")
 
-  function handleAnswer(scoreMap: Partial<Record<string, number>>) {
-    setScores(prev => {
-      const updated = { ...prev }
+  // pick correct list
+  let list: any[] = blCharacters
+  if (type === "manhwa") list = manhwaCharacters
+  if (type === "kpop") list = kpopCharacters
 
-      for (const id in scoreMap) {
-        const value = scoreMap[id]
-        if (value !== undefined) {
-          updated[id] = (updated[id] || 0) + value
-        }
-      }
+  const result =
+    list.find(c => c.id === id) ||
+    list[Math.floor(Math.random() * list.length)]
 
-      // ✅ LAST QUESTION → decide result HERE
-      if (index + 1 === kpopQuestions.length) {
-        const sorted = Object.entries(updated).sort((a, b) => b[1] - a[1])
-
-        const winnerId =
-          sorted[0]?.[0] || "random"
-
-        router.push(`/quiz/result?type=kpop&id=${winnerId}`)
-      }
-
-      return updated
-    })
-
-    // ✅ move to next question only if not finished
-    if (index + 1 < kpopQuestions.length) {
-      setIndex(prev => prev + 1)
-    }
+  if (!result) {
+    return <p className="text-center mt-20">Result not found 😢</p>
   }
 
+  const shareText = `💖 My Quiz Result 💖
+I got ${result.name}!
+
+Try the quiz 👉 ${typeof window !== "undefined" ? window.location.origin : ""}`
+
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`
+
   return (
-    <main className="min-h-screen flex items-center justify-center bg-pink-50 px-6">
-      <div className="max-w-xl w-full bg-white rounded-3xl p-8 shadow-lg">
-        <p className="text-sm text-gray-400 mb-2">
-          Question {index + 1} / {kpopQuestions.length}
-        </p>
+    <main className="min-h-screen flex items-center justify-center px-6 bg-pink-50">
+      <div className="max-w-xl w-full bg-white rounded-3xl p-8 shadow-lg text-center space-y-4">
+        <Image
+          src={result.image}
+          alt={result.name}
+          width={320}
+          height={320}
+          className="mx-auto rounded-2xl"
+        />
 
-        <h1 className="text-xl font-semibold mb-6">
-          {question.question}
-        </h1>
+        <h1 className="text-3xl font-bold">{result.name}</h1>
 
-        <div className="space-y-3">
-          {question.options.map((opt, i) => (
-            <button
-              key={i}
-              onClick={() => handleAnswer(opt.scores)}
-              className="w-full px-4 py-3 rounded-xl bg-pink-100 hover:bg-pink-200 transition text-left"
-            >
-              {opt.text}
-            </button>
-          ))}
+        {/* 🔹 BL / Manhwa */}
+        {type !== "kpop" && (
+          <>
+            <p className="italic text-gray-500">{result.source}</p>
+            <p>{result.description}</p>
+            <p className="font-semibold text-pink-600">
+              {result.message}
+            </p>
+          </>
+        )}
+
+        {/* 🔹 K-POP */}
+        {type === "kpop" && (
+          <>
+            <p className="italic text-gray-500">{result.group}</p>
+            <p className="font-semibold text-pink-600">
+              Your K-pop boyfriend energy 💖
+            </p>
+          </>
+        )}
+
+        {/* SHARE */}
+        <div className="mt-8 space-y-3">
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            className="block w-full rounded-xl bg-green-500 py-3 text-white font-semibold"
+          >
+            Share on WhatsApp
+          </a>
+
+          <button
+            onClick={async () => {
+              await navigator.clipboard.writeText(shareText)
+              alert("Copied! Paste on Instagram / Snapchat 💕")
+            }}
+            className="w-full rounded-xl bg-pink-500 py-3 text-white font-semibold"
+          >
+            Share to Instagram / Snapchat
+          </button>
+        </div>
+
+        {/* NAV */}
+        <div className="flex flex-wrap gap-3 justify-center mt-6">
+          <Link href={`/quiz/${type}`} className="px-4 py-2 bg-pink-100 rounded-xl">
+            Retry Quiz
+          </Link>
+
+          <Link href="/" className="px-4 py-2 bg-gray-100 rounded-xl">
+            Home
+          </Link>
         </div>
       </div>
     </main>
